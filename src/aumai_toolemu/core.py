@@ -214,9 +214,16 @@ def _build_fastapi_app(emulator: ToolEmulator) -> Any:
 class EmulatorServer:
     """FastAPI-based HTTP server that emulates tool endpoints.
 
+    By default the server binds only to localhost (``127.0.0.1``) so it is
+    not reachable from other machines.  Pass ``host="0.0.0.0"`` explicitly
+    when you need the server to accept external connections.
+
     Usage::
 
         server = EmulatorServer(config)
+        server.run(port=9000)  # binds to 127.0.0.1:9000 by default
+
+        # Expose to the network explicitly:
         server.run(host="0.0.0.0", port=9000)
     """
 
@@ -229,8 +236,14 @@ class EmulatorServer:
         """Return the underlying FastAPI application instance."""
         return self._app
 
-    def run(self, host: str = "0.0.0.0", port: int = 9000) -> None:
-        """Start the emulator HTTP server (blocking)."""
+    def run(self, host: str = "127.0.0.1", port: int = 9000) -> None:
+        """Start the emulator HTTP server (blocking).
+
+        Args:
+            host: Interface to bind to.  Defaults to ``"127.0.0.1"`` (localhost
+                only).  Pass ``"0.0.0.0"`` to listen on all interfaces.
+            port: TCP port to listen on.  Defaults to ``9000``.
+        """
         try:
             import uvicorn
         except ImportError as exc:
